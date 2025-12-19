@@ -26,9 +26,10 @@ const Home = () => {
     try {
       setLoading(true);
       const res = await getServices({ limit: 6, sortBy: 'rating' });
-      setServices(res.data);
+      setServices(Array.isArray(res.data) ? res.data : []);
     } catch (error) {
       toast.error('Error fetching featured services');
+      setServices([]);
     } finally {
       setLoading(false);
     }
