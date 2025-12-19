@@ -15,7 +15,7 @@ const Booking = () => {
         notes: ''
     });
     const navigate = useNavigate();
-    const isNewBooking = !isNaN(id);
+    const isNewBooking = window.location.pathname.includes('/booking/');
 
     useEffect(() => {
         const user = JSON.parse(localStorage.getItem('user') || 'null');
