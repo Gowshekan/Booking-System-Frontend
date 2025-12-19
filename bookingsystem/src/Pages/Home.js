@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { getServices } from '../api';
+import { toast } from 'react-toastify';
 import '../Styles/Home.css';
 
 const Home = () => {
@@ -22,8 +23,15 @@ const Home = () => {
   }, []);
 
   const fetchFeaturedServices = async () => {
-    setServices([]);
-    setLoading(false);
+    try {
+      setLoading(true);
+      const res = await getServices({ limit: 6, sortBy: 'rating' });
+      setServices(res.data);
+    } catch (error) {
+      toast.error('Error fetching featured services');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
@@ -78,7 +86,7 @@ const Home = () => {
             <div className="services-grid">
               {services.map((service) => (
                 <div key={service._id} className="service-card">
-                  <img src="/api/placeholder/300/200" alt={service.title} />
+                  <img src={service.image || "/api/placeholder/300/200"} alt={service.title} />
                   <div className="service-info">
                     <h3>{service.title}</h3>
                     <p>{service.description}</p>

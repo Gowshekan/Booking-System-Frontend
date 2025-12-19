@@ -4,10 +4,12 @@ import '../App.css';
 
 const Header = () => {
     const navigate = useNavigate();
+    const token = localStorage.getItem('token');
     const user = JSON.parse(localStorage.getItem('user') || 'null');
 
     const handleLogout = () => {
         localStorage.removeItem('user');
+        localStorage.removeItem('token');
         toast.success('Logged out successfully');
         navigate('/home');
     };
@@ -22,10 +24,13 @@ const Header = () => {
                     <NavLink to="/home">Home</NavLink>
                     <NavLink to="/services">Services</NavLink>
                     <NavLink to="/about">About</NavLink>
-                    <NavLink to="/customer-dashboard">My Bookings</NavLink>
+                    <NavLink to="/my-bookings">My Bookings</NavLink>
                     <NavLink to="/provider-registration">Become Provider</NavLink>
-                    {user ? (
-                        <button onClick={handleLogout} className="btn-primary">Logout</button>
+                    {token ? (
+                        <>
+                            <span>Welcome, {user?.name}</span>
+                            <button onClick={handleLogout} className="btn-primary">Logout</button>
+                        </>
                     ) : (
                         <NavLink to="/auth" className="btn-primary">Login</NavLink>
                     )}

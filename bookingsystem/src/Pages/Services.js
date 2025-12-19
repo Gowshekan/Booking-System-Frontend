@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, useSearchParams } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { getServices, getService } from '../api';
 import '../Styles/Services.css';
 
 const Services = () => {
@@ -37,49 +38,27 @@ const Services = () => {
   }, [id, filters]);
 
   const fetchService = async () => {
-    const allServices = JSON.parse(localStorage.getItem('services') || '[]');
-    const foundService = allServices.find(s => s.id === id);
-    
-    if (foundService) {
-      // Format service for display
-      const formattedService = {
-        ...foundService,
-        _id: foundService.id,
-        provider: {
-          name: foundService.providerName,
-          _id: foundService.providerId,
-          phone: foundService.providerPhone,
-          bio: `Professional service provider in ${foundService.serviceArea}`,
-          location: foundService.serviceArea,
-          rating: 4.8,
-          completedJobs: Math.floor(Math.random() * 100) + 50
-        },
-        features: [
-          'Professional service',
-          'Quality guarantee', 
-          'Insured work',
-          'Clean-up included',
-          'Licensed professional',
-          'Customer satisfaction guaranteed'
-        ]
-      };
-      setService(formattedService);
-    } else {
-      setService(null);
+    try {
+      setLoading(true);
+      const res = await getService(id);
+      setService(res.data);
+    } catch (error) {
+      toast.error('Error fetching service');
+    } finally {
+      setLoading(false);
     }
-    setLoading(false);
   };
 
   const fetchServices = async () => {
-    const allServices = JSON.parse(localStorage.getItem('services') || '[]');
-    let filteredServices = allServices;
-    
-    if (filters.category) {
-      filteredServices = filteredServices.filter(s => s.category === filters.category);
+    try {
+      setLoading(true);
+      const res = await getServices(filters);
+      setServices(res.data);
+    } catch (error) {
+      toast.error('Error fetching services');
+    } finally {
+      setLoading(false);
     }
-    
-    setServices(filteredServices);
-    setLoading(false);
   };
 
   const handleBookService = () => {
@@ -265,16 +244,28 @@ const Services = () => {
           </div>
 
           <div className="services-main">
-            <div className="no-services">
-              <h3>No services available</h3>
-              <p>Connect to backend API to load services</p>
-              <button 
-                className="btn-primary"
-                onClick={() => navigate('/')}
-              >
-                Go to Home
-              </button>
-            </div>
+            {services.length > 0 ? (
+              <div className="services-grid">
+                {services.map((service) => (
+                  <div key={service._id} className="service-card" onClick={() => navigate(`/services/${service._id}`)}>
+                    <img src={service.image || '/api/placeholder/300/200'} alt={service.title} />
+                    <div className="service-info">
+                      <h3>{service.title}</h3>
+                      <p>{service.category}</p>
+                      <div className="service-meta">
+                        <span className="price">${service.price}</span>
+                        <span className="rating">⭐ {service.rating || 4.5}</span>
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            ) : (
+              <div className="no-services">
+                <h3>No services available</h3>
+                <p>Try adjusting your filters or check back later.</p>
+              </div>
+            )}
           </div>
         </div>
       </div>

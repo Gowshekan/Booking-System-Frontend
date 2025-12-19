@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { getUserBookings } from '../api';
 import '../Styles/MyBooking.css';
 
 const MyBooking = () => {
@@ -19,8 +20,9 @@ const MyBooking = () => {
 
   const fetchBookings = async () => {
     try {
-      // For now, use empty array - ready for backend integration
-      setBookings([]);
+      setLoading(true);
+      const res = await getUserBookings();
+      setBookings(res.data);
     } catch (error) {
       toast.error('Error fetching bookings');
     } finally {

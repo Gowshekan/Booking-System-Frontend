@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { toast } from 'react-toastify';
+import { signup, login } from '../api';
 import '../Styles/Auth.css';
 
 const Auth = () => {
@@ -24,54 +25,27 @@ const Auth = () => {
 
     try {
       if (isLogin) {
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        const user = users.find(u => u.email === formData.email && u.password === formData.password);
-        
-        if (user) {
-          const { password, ...userWithoutPassword } = user;
-          localStorage.setItem('user', JSON.stringify(userWithoutPassword));
-          toast.success('Login successful!');
-          navigate('/');
-        } else {
-          toast.error('Invalid email or password');
-        }
+        const { email, password } = formData;
+        const res = await login({ email, password });
+        localStorage.setItem('user', JSON.stringify(res.data.user));
+        localStorage.setItem('token', res.data.token);
+        toast.success('Login successful!');
+        navigate('/');
       } else {
         if (formData.password !== formData.confirmPassword) {
           toast.error('Passwords do not match');
           setLoading(false);
           return;
         }
-
-        const users = JSON.parse(localStorage.getItem('users') || '[]');
-        
-        if (users.find(u => u.email === formData.email)) {
-          toast.error('Email already exists');
-          setLoading(false);
-          return;
-        }
-        
-        const newUser = {
-          id: Date.now().toString(),
-          name: formData.name,
-          email: formData.email,
-          password: formData.password,
-          role: formData.role,
-          phone: formData.phone,
-          address: formData.address,
-          createdAt: new Date().toISOString()
-        };
-        
-        users.push(newUser);
-        localStorage.setItem('users', JSON.stringify(users));
-        
-        const { password, ...userWithoutPassword } = newUser;
-        localStorage.setItem('user', JSON.stringify(userWithoutPassword));
-        
+        const { name, email, password, role, phone, address } = formData;
+        const res = await signup({ name, email, password, role, phone, address });
+        localStorage.setItem('user', JSON.stringify(res.data.user));
+        localStorage.setItem('token', res.data.token);
         toast.success('Registration successful!');
         navigate('/');
       }
     } catch (error) {
-      toast.error('An error occurred. Please try again.');
+      toast.error(error.response?.data?.message || 'An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
